@@ -30,7 +30,15 @@ class Device(delta3.Device):
         return 0
 
     @controls.current(dc_charging_max_amps_2, max=dynamic(dc_charging_current_max_2))
-    async def set_dc_charging_amps_max_2(self, value: float) -> bool:
-        return await self.set_dc_charging_amps_max(
-            value, plug_index=pd335_sys_pb2.PV_PLUG_INDEX_2
-        )
+    async def set_dc_charging_amps_max_2(
+        self,
+        value: float,
+        plug_index: pd335_sys_pb2.PV_PLUG_INDEX = pd335_sys_pb2.PV_PLUG_INDEX_2,
+    ) -> bool:
+        config = pd335_sys_pb2.ConfigWrite()
+        config.cfg_pv_dc_chg_setting.pv_plug_index = plug_index
+        config.cfg_pv_dc_chg_setting.pv_chg_vol_spec = pd335_sys_pb2.PV_CHG_VOL_SPEC_12V
+        config.cfg_pv_dc_chg_setting.pv_chg_amp_limit = int(value)
+
+        await self._send_config_packet(config)
+        return True
